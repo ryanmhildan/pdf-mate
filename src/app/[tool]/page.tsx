@@ -8,6 +8,12 @@ import { ToolCard } from "@/components/tool-card";
 import { AdSlot } from "@/components/ad-slot";
 import { Reveal } from "@/components/motion";
 import { PageBackdrop } from "@/components/page-backdrop";
+import { MergeTool } from "@/components/tools/merge-tool";
+
+/** Tools whose processing is implemented. The rest show a placeholder upload area. */
+const workspaces: Partial<Record<string, React.ComponentType>> = {
+  "gabung-pdf": MergeTool,
+};
 
 export function generateStaticParams() {
   return tools.map((t) => ({ tool: t.slug }));
@@ -26,6 +32,7 @@ export default async function ToolPage(props: PageProps<"/[tool]">) {
   if (!tool) notFound();
 
   const Icon = tool.icon;
+  const Workspace = workspaces[tool.slug];
   const cat = getCategory(tool.category);
   const related = tools.filter((t) => t.category === tool.category && t.slug !== tool.slug).slice(0, 4);
 
@@ -73,6 +80,8 @@ export default async function ToolPage(props: PageProps<"/[tool]">) {
                   Lihat semua alat
                 </Link>
               </div>
+            ) : Workspace ? (
+              <Workspace />
             ) : (
               <FileDropzone
                 accept={tool.accept}

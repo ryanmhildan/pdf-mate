@@ -87,3 +87,6 @@ GEMINI.md
 mcp.json
 # Design-system output from AI design tools
 design-system/
+
+# pdf.js worker (copied from node_modules on install)
+/public/pdf.worker.min.mjs
