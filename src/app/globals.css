@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* PDF Mate design tokens — light glassmorphism, indigo → violet gradient, rose accent */
+@theme {
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-on-primary: #ffffff;
+  --color-primary-soft: #eef2ff;
+  --color-violet: #7c3aed;
+  --color-accent: #e11d48;
+  --color-accent-hover: #be123c;
+  --color-on-accent: #ffffff;
+  --color-background: #fafafc;
+  --color-surface: #f4f4fb;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-muted: #eef0f6;
+  --color-muted-foreground: #475569;
+  --color-border: #e4e7f0;
+  --color-border-strong: #c7d2fe;
+  --color-destructive: #dc2626;
+
+  /* Category colors for tool icons */
+  --color-cat-organize: #4f46e5;
+  --color-cat-convert: #0284c7;
+  --color-cat-edit: #7c3aed;
+  --color-cat-optimize: #c2410c;
+  --color-cat-security: #e11d48;
+
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), var(--font-body), ui-sans-serif, sans-serif;
+
+  --animate-blob: blob 18s ease-in-out infinite;
+  --animate-shimmer: shimmer 6s linear infinite;
+
+  @keyframes blob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -30px) scale(1.08); }
+    66% { transform: translate(-30px, 25px) scale(0.95); }
+  }
+  @keyframes shimmer {
+    to { background-position: 200% center; }
+  }
+}
+
+@layer components {
+  .text-gradient {
+    background: linear-gradient(90deg, #4f46e5, #7c3aed, #db2777, #4f46e5);
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: var(--animate-shimmer);
+  }
+  .bg-brand-gradient {
+    background-image: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  }
+  .glass {
+    background: rgb(255 255 255 / 0.82);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgb(255 255 255 / 0.8);
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(79 70 229 / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(79 70 229 / 0.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 40%, transparent 100%);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
