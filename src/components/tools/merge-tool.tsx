@@ -2,25 +2,13 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, Reorder, motion, useDragControls } from "motion/react";
-import {
-  ArrowDown,
-  ArrowDownAZ,
-  ArrowUp,
-  CheckCircle2,
-  Download,
-  FileText,
-  GripVertical,
-  Loader2,
-  Lock,
-  RotateCcw,
-  TriangleAlert,
-  X,
-} from "lucide-react";
+import { ArrowDown, ArrowDownAZ, ArrowUp, FileText, GripVertical, Loader2, Lock, TriangleAlert, X } from "lucide-react";
 import { UploadArea } from "../upload-area";
 import { easeOut } from "../motion";
 import { formatSize, toPdfFileName } from "@/lib/format";
 import { inspectPdf, PdfInspectError } from "@/lib/pdf/inspect";
 import { mergePdfs } from "@/lib/pdf/merge";
+import { DoneCard, Notice, ProgressOverlay } from "./shared";
 
 const MAX_FILES = 20;
 const MAX_SIZE_MB = 50;
@@ -166,7 +154,23 @@ export function MergeTool() {
 
       <AnimatePresence mode="wait">
         {phase.kind === "done" ? (
-          <ResultCard key="done" result={phase.result} onBack={backToEdit} onStartOver={startOver} />
+          <DoneCard
+            key="done"
+            title="PDF berhasil digabung"
+            meta={
+              <>
+                <span className="font-semibold text-foreground">{phase.result.name}</span> · {phase.result.pageCount}{" "}
+                halaman · {formatSize(phase.result.size)}
+              </>
+            }
+            href={phase.result.url}
+            downloadName={phase.result.name}
+            downloadLabel="Unduh PDF"
+            backLabel="Ubah urutan file"
+            onBack={backToEdit}
+            startOverLabel="Gabung file lain"
+            onStartOver={startOver}
+          />
         ) : items.length === 0 ? (
           <motion.div key="empty" exit={{ opacity: 0, y: -8 }}>
             <UploadArea
@@ -291,32 +295,20 @@ export function MergeTool() {
             </div>
 
             <AnimatePresence>
-              {phase.kind === "merging" && <MergingOverlay done={phase.done} total={phase.total} />}
+              {phase.kind === "merging" && (
+                <ProgressOverlay
+                  title="Menggabungkan PDF…"
+                  detail={`File ${Math.min(phase.done + 1, phase.total)} dari ${phase.total}`}
+                  pct={(phase.done / phase.total) * 100}
+                />
+              )}
             </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {notice && (
-          <motion.div
-            role="alert"
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="mt-4 flex items-start justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
-          >
-            <span>{notice}</span>
-            <button
-              type="button"
-              onClick={() => setNotice(null)}
-              aria-label="Tutup pesan"
-              className="-m-1 inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg hover:bg-red-100"
-            >
-              <X className="size-4" aria-hidden />
-            </button>
-          </motion.div>
-        )}
+        {notice && <Notice message={notice} onClose={() => setNotice(null)} />}
       </AnimatePresence>
     </div>
   );
@@ -415,93 +407,5 @@ function MergeRow({
         </button>
       </div>
     </Reorder.Item>
-  );
-}
-
-function MergingOverlay({ done, total }: { done: number; total: number }) {
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute -inset-2 z-20 flex flex-col items-center justify-center gap-5 rounded-3xl bg-white/85 backdrop-blur-sm"
-      role="status"
-    >
-      <motion.span
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-        className="bg-brand-gradient inline-flex size-14 items-center justify-center rounded-2xl text-white shadow-xl shadow-indigo-500/30"
-      >
-        <Loader2 className="size-7" aria-hidden />
-      </motion.span>
-      <div className="w-64 text-center">
-        <p className="font-display text-lg font-bold">Menggabungkan PDF…</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          File {Math.min(done + 1, total)} dari {total}
-        </p>
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
-          <motion.div
-            className="bg-brand-gradient h-full rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function ResultCard({ result, onBack, onStartOver }: { result: Result; onBack: () => void; onStartOver: () => void }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.96, y: 12 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.4, ease: easeOut }}
-      className="glass flex flex-col items-center gap-5 rounded-3xl px-6 py-12 text-center shadow-sm"
-    >
-      <motion.span
-        initial={{ scale: 0, rotate: -30 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: "spring", stiffness: 260, damping: 16, delay: 0.1 }}
-        className="inline-flex size-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
-      >
-        <CheckCircle2 className="size-9" aria-hidden />
-      </motion.span>
-      <div>
-        <h2 className="font-display text-2xl font-bold">PDF berhasil digabung</h2>
-        <p className="mt-2 text-muted-foreground">
-          <span className="font-semibold text-foreground">{result.name}</span> · {result.pageCount} halaman ·{" "}
-          {formatSize(result.size)}
-        </p>
-      </div>
-      <motion.a
-        href={result.url}
-        download={result.name}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
-        className="bg-brand-gradient inline-flex min-h-13 items-center gap-2 rounded-2xl px-8 text-lg font-semibold text-white shadow-xl shadow-indigo-500/30"
-      >
-        <Download className="size-5" aria-hidden /> Unduh PDF
-      </motion.a>
-      <div className="flex flex-wrap justify-center gap-2">
-        <button
-          type="button"
-          onClick={onBack}
-          className="min-h-11 cursor-pointer rounded-xl border border-border bg-card px-4 text-sm font-semibold transition-colors hover:border-primary"
-        >
-          Ubah urutan file
-        </button>
-        <button
-          type="button"
-          onClick={onStartOver}
-          className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl px-4 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <RotateCcw className="size-4" aria-hidden /> Gabung file lain
-        </button>
-      </div>
-    </motion.div>
   );
 }

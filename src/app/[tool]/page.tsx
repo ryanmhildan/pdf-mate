@@ -9,11 +9,16 @@ import { AdSlot } from "@/components/ad-slot";
 import { Reveal } from "@/components/motion";
 import { PageBackdrop } from "@/components/page-backdrop";
 import { MergeTool } from "@/components/tools/merge-tool";
+import { SplitTool } from "@/components/tools/split-tool";
 
 /** Tools whose processing is implemented. The rest show a placeholder upload area. */
 const workspaces: Partial<Record<string, React.ComponentType>> = {
   "gabung-pdf": MergeTool,
+  "pisah-pdf": SplitTool,
 };
+
+/** Tools that need more room than the default narrow column. */
+const wideTools = new Set(["pisah-pdf"]);
 
 export function generateStaticParams() {
   return tools.map((t) => ({ tool: t.slug }));
@@ -33,6 +38,7 @@ export default async function ToolPage(props: PageProps<"/[tool]">) {
 
   const Icon = tool.icon;
   const Workspace = workspaces[tool.slug];
+  const wide = wideTools.has(tool.slug);
   const cat = getCategory(tool.category);
   const related = tools.filter((t) => t.category === tool.category && t.slug !== tool.slug).slice(0, 4);
 
@@ -40,7 +46,7 @@ export default async function ToolPage(props: PageProps<"/[tool]">) {
     <>
       <section className="relative isolate">
         <PageBackdrop />
-        <div className="mx-auto max-w-3xl px-4 pb-14 pt-8 sm:px-6">
+        <div className={`mx-auto px-4 pb-14 pt-8 sm:px-6 ${wide ? "max-w-6xl" : "max-w-3xl"}`}>
           <nav aria-label="Breadcrumb" className="mb-10 text-sm text-muted-foreground">
             <ol className="flex items-center gap-1">
               <li>
