@@ -1,5 +1,7 @@
 "use client";
 
+import type { Matrix } from "./matrix";
+
 type Pdfjs = typeof import("pdfjs-dist");
 
 let pdfjsPromise: Promise<Pdfjs> | null = null;
@@ -53,6 +55,8 @@ export type OpenedPdf = {
   pageCount: number;
   /** Renders one page (1-based) to a PNG object URL — revoke it when no longer needed. */
   renderPage: (pageNumber: number, width?: number) => Promise<string | null>;
+  /** Displayed size (points, after rotation) and the pdf.js PDF→screen transform at scale 1. */
+  getPageGeometry: (pageNumber: number) => Promise<{ width: number; height: number; transform: Matrix }>;
   close: () => Promise<void>;
 };
 
@@ -74,6 +78,10 @@ export async function openPdf(data: ArrayBuffer): Promise<OpenedPdf> {
   return {
     pageCount: doc.numPages,
     renderPage: (n, width = 160) => renderToUrl(doc, n, width),
+    getPageGeometry: async (n) => {
+      const vp = (await doc.getPage(n)).getViewport({ scale: 1 });
+      return { width: vp.width, height: vp.height, transform: vp.transform as Matrix };
+    },
     close: () => task.destroy(),
   };
 }
