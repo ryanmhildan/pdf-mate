@@ -10,15 +10,17 @@ import { Reveal } from "@/components/motion";
 import { PageBackdrop } from "@/components/page-backdrop";
 import { MergeTool } from "@/components/tools/merge-tool";
 import { SplitTool } from "@/components/tools/split-tool";
+import { EditTool } from "@/components/tools/edit-tool";
 
 /** Tools whose processing is implemented. The rest show a placeholder upload area. */
 const workspaces: Partial<Record<string, React.ComponentType>> = {
   "gabung-pdf": MergeTool,
   "pisah-pdf": SplitTool,
+  "edit-pdf": EditTool,
 };
 
 /** Tools that need more room than the default narrow column. */
-const wideTools = new Set(["pisah-pdf"]);
+const wideTools = new Set(["pisah-pdf", "edit-pdf"]);
 
 export function generateStaticParams() {
   return tools.map((t) => ({ tool: t.slug }));
